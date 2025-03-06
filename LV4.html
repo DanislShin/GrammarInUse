@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>문장 유형 바꾸기 문제</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f9;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 60%;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .question {
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+      input {
+        padding: 5px 10px;
+        font-size: 16px;
+        width: 300px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .result {
+        margin-top: 20px;
+        font-size: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>문장 유형 바꾸기 문제</h1>
+      <div id="quiz-container">
+        <div class="question">
+          1. "The book is interesting."을 부정문으로 바꾸세요:
+          <input type="text" id="q1" />
+        </div>
+        <div class="question">
+          2. "My parents are supportive."을 의문문으로 바꾸세요:
+          <input type="text" id="q2" />
+        </div>
+        <div class="question">
+          3. "Her ideas are innovative."을 의문 부정문으로 바꾸세요:
+          <input type="text" id="q3" />
+        </div>
+        <div class="question">
+          4. "The weather is nice today."을 부정문으로 바꾸세요:
+          <input type="text" id="q4" />
+        </div>
+        <div class="question">
+          5. "This problem is difficult."을 의문문으로 바꾸세요:
+          <input type="text" id="q5" />
+        </div>
+        <div class="question">
+          6. "The students are ready."을 부정문으로 바꾸세요:
+          <input type="text" id="q6" />
+        </div>
+        <div class="question">
+          7. "My car is old."을 의문문으로 바꾸세요:
+          <input type="text" id="q7" />
+        </div>
+        <div class="question">
+          8. "My sister is kind."을 의문 부정문으로 바꾸세요:
+          <input type="text" id="q8" />
+        </div>
+        <div class="question">
+          9. "My best friend is funny."을 부정문으로 바꾸세요:
+          <input type="text" id="q9" />
+        </div>
+        <div class="question">
+          10. "Our dog is playful."을 의문문으로 바꾸세요:
+          <input type="text" id="q10" />
+        </div>
+        <div class="question">
+          11. "My uncle is tall."을 의문 부정문으로 바꾸세요:
+          <input type="text" id="q11" />
+        </div>
+        <button onclick="submitQuiz()">제출</button>
+      </div>
+      <div class="result" id="result"></div>
+    </div>
+
+    <script>
+      const correctAnswers = {
+        q1: "The book is not interesting.",
+        q2: "Are my parents supportive?",
+        q3: "Are her ideas not innovative?",
+        q4: "The weather is not nice today.",
+        q5: "Is this problem difficult?",
+        q6: "The students are not ready.",
+        q7: "Is my car old?",
+        q8: "Is my sister not kind?",
+        q9: "My best friend is not funny.",
+        q10: "Is our dog playful?",
+        q11: "Is my uncle not tall?",
+      };
+
+      function submitQuiz() {
+        let score = 0;
+
+        for (let i = 1; i <= 11; i++) {
+          const userAnswer = document.getElementById(`q${i}`).value.trim();
+          if (userAnswer === correctAnswers[`q${i}`]) {
+            score++;
+          }
+        }
+
+        const resultElement = document.getElementById("result");
+        resultElement.innerHTML = `점수: ${score} / 11`;
+      }
+    </script>
+  </body>
+</html>

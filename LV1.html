@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Be Verb Quiz</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f4f4f9;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      .question {
+        margin-bottom: 15px;
+      }
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .result {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Be Verb Quiz - 어울리는 Be 동사를 고르세요.</h1>
+    <form id="quizForm">
+      <div class="question">
+        1. The book () interesting.<br />
+        <input type="radio" name="q1" value="is" /> is
+        <input type="radio" name="q1" value="are" /> are
+        <input type="radio" name="q1" value="am" /> am
+      </div>
+      <div class="question">
+        2. My parents () supportive.<br />
+        <input type="radio" name="q2" value="is" /> is
+        <input type="radio" name="q2" value="are" /> are
+        <input type="radio" name="q2" value="am" /> am
+      </div>
+      <div class="question">
+        3. Her ideas () innovative.<br />
+        <input type="radio" name="q3" value="is" /> is
+        <input type="radio" name="q3" value="are" /> are
+        <input type="radio" name="q3" value="am" /> am
+      </div>
+      <div class="question">
+        4. The weather () nice today.<br />
+        <input type="radio" name="q4" value="is" /> is
+        <input type="radio" name="q4" value="are" /> are
+        <input type="radio" name="q4" value="am" /> am
+      </div>
+      <div class="question">
+        5. This problem () difficult.<br />
+        <input type="radio" name="q5" value="is" /> is
+        <input type="radio" name="q5" value="are" /> are
+        <input type="radio" name="q5" value="am" /> am
+      </div>
+      <div class="question">
+        6. The students () ready.<br />
+        <input type="radio" name="q6" value="is" /> is
+        <input type="radio" name="q6" value="are" /> are
+        <input type="radio" name="q6" value="am" /> am
+      </div>
+      <div class="question">
+        7. My car () old.<br />
+        <input type="radio" name="q7" value="is" /> is
+        <input type="radio" name="q7" value="are" /> are
+        <input type="radio" name="q7" value="am" /> am
+      </div>
+      <div class="question">
+        8. My sister () kind.<br />
+        <input type="radio" name="q8" value="is" /> is
+        <input type="radio" name="q8" value="are" /> are
+        <input type="radio" name="q8" value="am" /> am
+      </div>
+      <div class="question">
+        9. My best friend () funny.<br />
+        <input type="radio" name="q9" value="is" /> is
+        <input type="radio" name="q9" value="are" /> are
+        <input type="radio" name="q9" value="am" /> am
+      </div>
+      <div class="question">
+        10. Our dog () playful.<br />
+        <input type="radio" name="q10" value="is" /> is
+        <input type="radio" name="q10" value="are" /> are
+        <input type="radio" name="q10" value="am" /> am
+      </div>
+      <div class="question">
+        11. My uncle () tall.<br />
+        <input type="radio" name="q11" value="is" /> is
+        <input type="radio" name="q11" value="are" /> are
+        <input type="radio" name="q11" value="am" /> am
+      </div>
+      <button type="button" onclick="checkAnswers()">Submit</button>
+    </form>
+
+    <div class="result" id="result"></div>
+
+    <script>
+      const correctAnswers = {
+        q1: "is",
+        q2: "are",
+        q3: "are",
+        q4: "is",
+        q5: "is",
+        q6: "are",
+        q7: "is",
+        q8: "is",
+        q9: "is",
+        q10: "is",
+        q11: "is",
+      };
+
+      function checkAnswers() {
+        const form = document.getElementById("quizForm");
+        let score = 0;
+        let totalQuestions = Object.keys(correctAnswers).length;
+
+        Object.keys(correctAnswers).forEach((question) => {
+          const answer = form.elements[question].value;
+          if (answer === correctAnswers[question]) {
+            score++;
+          }
+        });
+
+        document.getElementById(
+          "result"
+        ).innerText = ` 총 ${totalQuestions}점 중 ${score} 을 획득하셨습니다.`;
+      }
+    </script>
+  </body>
+</html>

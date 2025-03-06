@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>베스티온 어학원</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        background-image: url("https://www.w3schools.com/w3images/spring.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: white;
+      }
+      .container {
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 800px;
+        text-align: center;
+      }
+      h1 {
+        color: #333;
+        font-size: 2em;
+        margin-bottom: 20px;
+      }
+      p {
+        font-size: 1.2em;
+        margin-bottom: 30px;
+        color: #333;
+      }
+      button {
+        padding: 15px 30px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.1em;
+        margin: 10px;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .buttons-container {
+        display: flex;
+        flex-direction: row; /* 버튼을 가로로 나열하도록 설정 */
+        justify-content: center; /* 버튼들을 가운데 정렬 */
+        flex-wrap: wrap; /* 화면 크기에 맞게 버튼들이 줄 바꿈되도록 설정 */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>베스티온 어학원에 오신것을 환영합니다!</h1>
+      <p>Grammar in Use에서 배운내용을 테스트 합니다. 아래에서 골라주세요.</p>
+
+      <div class="buttons-container">
+        <button onclick="window.location.href='LV1.html'">LV1</button>
+        <button onclick="window.location.href='LV2.html'">LV2</button>
+        <button onclick="window.location.href='LV3.html'">LV3</button>
+        <button onclick="window.location.href='LV4.html'">LV4</button>
+        <button onclick="window.location.href='LV5.html'">LV5</button>
+        <button onclick="window.location.href='LV6.html'">LV6</button>
+      </div>
+    </div>
+  </body>
+</html>

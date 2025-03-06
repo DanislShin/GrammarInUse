@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>문장 녹음, 재생, 다운로드</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #f4f4f9;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 800px;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .sentence {
+        font-size: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      .controls {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .controls button {
+        margin: 5px;
+      }
+      .audio-player {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>문장 녹음, 재생 및 다운로드</h1>
+      <div class="sentence" id="sentence"></div>
+
+      <button onclick="nextSentence()">다음 문장</button>
+
+      <div class="controls">
+        <button onclick="startRecording()">녹음 시작</button>
+        <button id="stopButton" onclick="stopRecording()" disabled>
+          녹음 중지
+        </button>
+        <button onclick="playRecording()">녹음 재생</button>
+        <button onclick="downloadRecording()">녹음 다운로드</button>
+      </div>
+
+      <audio id="audioPlayer" class="audio-player" controls></audio>
+    </div>
+
+    <script>
+      const sentences = [
+        {
+          positive: "The book is interesting.",
+          negative: "The book is not interesting.",
+          question: "Is the book interesting?",
+          questionNegative: "Is the book not interesting?",
+        },
+        {
+          positive: "My parents are supportive.",
+          negative: "My parents are not supportive.",
+          question: "Are my parents supportive?",
+          questionNegative: "Are my parents not supportive?",
+        },
+        {
+          positive: "Her ideas are innovative.",
+          negative: "Her ideas are not innovative.",
+          question: "Are her ideas innovative?",
+          questionNegative: "Are her ideas not innovative?",
+        },
+        {
+          positive: "The weather is nice today.",
+          negative: "The weather is not nice today.",
+          question: "Is the weather nice today?",
+          questionNegative: "Is the weather not nice today?",
+        },
+        {
+          positive: "This problem is difficult.",
+          negative: "This problem is not difficult.",
+          question: "Is this problem difficult?",
+          questionNegative: "Is this problem not difficult?",
+        },
+        {
+          positive: "The students are ready.",
+          negative: "The students are not ready.",
+          question: "Are the students ready?",
+          questionNegative: "Are the students not ready?",
+        },
+        {
+          positive: "My car is old.",
+          negative: "My car is not old.",
+          question: "Is my car old?",
+          questionNegative: "Is my car not old?",
+        },
+        {
+          positive: "My sister is kind.",
+          negative: "My sister is not kind.",
+          question: "Is my sister kind?",
+          questionNegative: "Is my sister not kind?",
+        },
+        {
+          positive: "My best friend is funny.",
+          negative: "My best friend is not funny.",
+          question: "Is my best friend funny?",
+          questionNegative: "Is my best friend not funny?",
+        },
+        {
+          positive: "Our dog is playful.",
+          negative: "Our dog is not playful.",
+          question: "Is our dog playful?",
+          questionNegative: "Is our dog not playful?",
+        },
+        {
+          positive: "My uncle is a student.",
+          negative: "My uncle is not a student.",
+          question: "Is my uncle a student?",
+          questionNegative: "Is my uncle not a student?",
+        },
+      ];
+
+      let mediaRecorder;
+      let audioChunks = [];
+      let usedSentences = []; // To track which sentences were used
+
+      // Get a random sentence from the remaining ones
+      function getRandomSentence() {
+        const availableSentences = sentences.filter(
+          (_, index) => !usedSentences.includes(index)
+        );
+        if (availableSentences.length === 0) {
+          usedSentences = []; // Reset if all sentences have been used
+          return getRandomSentence(); // Recursively call until all sentences are used
+        }
+
+        const randomIndex = Math.floor(
+          Math.random() * availableSentences.length
+        );
+        const randomSentence = availableSentences[randomIndex];
+        usedSentences.push(sentences.indexOf(randomSentence)); // Mark the sentence as used
+        return randomSentence;
+      }
+
+      function nextSentence() {
+        const sentence = getRandomSentence();
+        const sentenceType = getRandomSentenceType();
+        const sentenceText = sentence[sentenceType];
+        document.getElementById("sentence").textContent = sentenceText;
+        speakSentence(sentenceText); // Add this to speak the sentence
+      }
+
+      function getRandomSentenceType() {
+        const types = ["positive", "negative", "question", "questionNegative"];
+        const randomType = types[Math.floor(Math.random() * types.length)];
+        return randomType;
+      }
+
+      function speakSentence(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "en-US"; // 영어 설정
+        speechSynthesis.speak(utterance);
+      }
+
+      function startRecording() {
+        audioChunks = [];
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+          };
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audioPlayer = document.getElementById("audioPlayer");
+            audioPlayer.src = audioUrl;
+            audioPlayer.style.display = "block";
+          };
+          mediaRecorder.start();
+          document.getElementById("stopButton").disabled = false; // Enable the stop button
+          document.getElementById("recordButton").disabled = true; // Disable the start button
+        });
+      }
+
+      function stopRecording() {
+        mediaRecorder.stop();
+        document.getElementById("stopButton").disabled = true; // Disable the stop button
+        document.getElementById("recordButton").disabled = false; // Enable the start button
+      }
+
+      function playRecording() {
+        const audioPlayer = document.getElementById("audioPlayer");
+        audioPlayer.play();
+      }
+
+      function downloadRecording() {
+        const audioPlayer = document.getElementById("audioPlayer");
+        const audioUrl = audioPlayer.src;
+        const link = document.createElement("a");
+        link.href = audioUrl;
+        link.download = "recording.wav";
+        link.click();
+      }
+
+      // Initialize the first sentence
+      nextSentence();
+    </script>
+  </body>
+</html>

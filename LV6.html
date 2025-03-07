@@ -105,7 +105,12 @@
         background-color: #e74c3c;
       }
 
-      .record-btn:hover {
+      .record-btn.recording {
+        background-color: #c0392b;
+        animation: pulse 1s infinite;
+      }
+
+      .record-btn:hover:not(.recording) {
         background-color: #c0392b;
       }
 
@@ -158,6 +163,18 @@
 
       .incorrect {
         color: red;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
       @media (max-width: 480px) {
@@ -567,53 +584,73 @@
       function setupRecordingControls(questionNum) {
         const controls = document.getElementById(`controls${questionNum}`);
         controls.innerHTML = `
-                <button class="record-btn" onclick="startRecording(${questionNum})">Record</button>
-                <button class="stop-btn" onclick="stopRecording(${questionNum})" disabled>Stop</button>
-                <button class="play-btn" onclick="playRecording(${questionNum})" disabled>Play</button>
-                <button class="download-btn" onclick="downloadRecording(${questionNum})" disabled>Download</button>
-            `;
+          <button class="record-btn" onclick="startRecording(${questionNum})">Record</button>
+          <button class="stop-btn" onclick="stopRecording(${questionNum})" disabled>Stop</button>
+          <button class="play-btn" onclick="playRecording(${questionNum})" disabled>Play</button>
+          <button class="download-btn" onclick="downloadRecording(${questionNum})" disabled>Download</button>
+        `;
       }
 
       async function startRecording(questionNum) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          const mimeType = MediaRecorder.isTypeSupported("audio/mp4")
+            ? "audio/mp4"
+            : "audio/webm";
+          mediaRecorder = new MediaRecorder(stream, { mimeType });
+          audioChunks = [];
 
-        mediaRecorder.ondataavailable = (event) => {
-          audioChunks.push(event.data);
-        };
+          mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+          };
 
-        mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-          recordings[questionNum] = audioBlob;
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: mimeType });
+            recordings[questionNum] = audioBlob;
 
+            const controls = document.getElementById(`controls${questionNum}`);
+            const recordBtn = controls.querySelector(".record-btn");
+            recordBtn.textContent = "Record";
+            recordBtn.classList.remove("recording");
+            recordBtn.disabled = false;
+            controls.querySelector(".stop-btn").disabled = true;
+            controls.querySelector(".play-btn").disabled = false;
+            controls.querySelector(".download-btn").disabled = false;
+          };
+
+          mediaRecorder.start();
           const controls = document.getElementById(`controls${questionNum}`);
-          controls.querySelector(".record-btn").disabled = false;
-          controls.querySelector(".stop-btn").disabled = true;
-          controls.querySelector(".play-btn").disabled = false;
-          controls.querySelector(".download-btn").disabled = false;
-        };
-
-        mediaRecorder.start();
-        const controls = document.getElementById(`controls${questionNum}`);
-        controls.querySelector(".record-btn").disabled = true;
-        controls.querySelector(".stop-btn").disabled = false;
-        controls.querySelector(".play-btn").disabled = true;
-        controls.querySelector(".download-btn").disabled = true;
+          const recordBtn = controls.querySelector(".record-btn");
+          recordBtn.textContent = "Recording...";
+          recordBtn.classList.add("recording");
+          recordBtn.disabled = true;
+          controls.querySelector(".stop-btn").disabled = false;
+          controls.querySelector(".play-btn").disabled = true;
+          controls.querySelector(".download-btn").disabled = true;
+        } catch (error) {
+          alert(
+            "Unable to start recording. Please ensure microphone access is allowed.\nError: " +
+              error.message
+          );
+        }
       }
 
       function stopRecording(questionNum) {
-        mediaRecorder.stop();
-        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+        }
       }
 
       function playRecording(questionNum) {
         if (recordings[questionNum]) {
           const audioUrl = URL.createObjectURL(recordings[questionNum]);
           const audio = new Audio(audioUrl);
-          audio.play();
+          audio
+            .play()
+            .catch((error) => alert("Playback failed: " + error.message));
         }
       }
 
@@ -622,7 +659,9 @@
           const audioUrl = URL.createObjectURL(recordings[questionNum]);
           const a = document.createElement("a");
           a.href = audioUrl;
-          a.download = `recording_q${questionNum}.webm`;
+          a.download = `recording_q${questionNum}.${
+            recordings[questionNum].type.split("/")[1]
+          }`;
           a.click();
           URL.revokeObjectURL(audioUrl);
         }
@@ -631,11 +670,8 @@
       // Show/hide answer
       function toggleAnswer(questionNum) {
         const answer = document.getElementById(`answer${questionNum}`);
-        if (answer.style.display === "inline") {
-          answer.style.display = "none";
-        } else {
-          answer.style.display = "inline";
-        }
+        answer.style.display =
+          answer.style.display === "inline" ? "none" : "inline";
       }
 
       // Quiz submission

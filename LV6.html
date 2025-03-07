@@ -1,234 +1,761 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>문장 녹음, 재생, 다운로드</title>
+    <title>Be Verb Translation Quiz with Recording</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
+        background-color: #f4f4f4;
         display: flex;
         justify-content: center;
         align-items: center;
-        flex-direction: column;
-        height: 100vh;
-        background-color: #f4f4f9;
+        min-height: 100vh;
+        margin: 0;
+        padding: 10px;
+        box-sizing: border-box;
       }
+
       .container {
         background-color: white;
         padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 80%;
-        max-width: 800px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 900px;
+        min-width: 280px;
+        text-align: left;
+        box-sizing: border-box;
       }
+
       h1 {
         text-align: center;
         color: #333;
-      }
-      .sentence {
-        font-size: 20px;
+        font-size: 1.5em;
         margin-bottom: 20px;
-        text-align: center;
       }
-      button {
-        padding: 10px 20px;
-        background-color: #4caf50;
+
+      .question {
+        margin: 20px 0;
+        font-size: 1em;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .korean {
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .answer-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .answer {
+        display: none;
+        color: #2c3e50;
+        font-style: italic;
+      }
+
+      .show-answer {
+        padding: 5px 10px;
+        background-color: #3498db;
         color: white;
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        font-size: 0.9em;
       }
-      button:hover {
+
+      .show-answer:hover {
+        background-color: #2980b9;
+      }
+
+      input[type="text"] {
+        padding: 5px;
+        font-size: 0.95em;
+        width: 100%;
+        max-width: 600px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .recording-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 5px 10px;
+        font-size: 0.9em;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+      }
+
+      .record-btn {
+        background-color: #e74c3c;
+      }
+
+      .record-btn:hover {
+        background-color: #c0392b;
+      }
+
+      .stop-btn {
+        background-color: #f39c12;
+      }
+
+      .stop-btn:hover {
+        background-color: #e67e22;
+      }
+
+      .play-btn {
+        background-color: #2ecc71;
+      }
+
+      .play-btn:hover {
+        background-color: #27ae60;
+      }
+
+      .download-btn {
+        background-color: #8e44ad;
+      }
+
+      .download-btn:hover {
+        background-color: #732d91;
+      }
+
+      #submit-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #4caf50;
+        font-size: 1em;
+        margin-top: 20px;
+      }
+
+      #submit-btn:hover {
         background-color: #45a049;
       }
-      .controls {
+
+      .results {
         margin-top: 20px;
-        text-align: center;
+        font-size: 0.95em;
+        color: #333;
+        word-wrap: break-word;
       }
-      .controls button {
-        margin: 5px;
+
+      .correct {
+        color: green;
       }
-      .audio-player {
-        display: none;
+
+      .incorrect {
+        color: red;
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px;
+        }
+        h1 {
+          font-size: 1.2em;
+        }
+        .question {
+          margin: 15px 0;
+        }
+        .korean {
+          font-size: 0.85em;
+        }
+        input[type="text"],
+        button {
+          font-size: 0.9em;
+        }
+        .recording-controls {
+          flex-direction: column;
+        }
+        #submit-btn {
+          padding: 10px;
+        }
+      }
+
+      @media (min-width: 901px) {
+        h1 {
+          font-size: 1.8em;
+        }
+        .question {
+          font-size: 1.1em;
+        }
+        .korean {
+          font-size: 1em;
+        }
+        input[type="text"],
+        button {
+          font-size: 1em;
+        }
+        #submit-btn {
+          font-size: 1.1em;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>문장 녹음, 재생 및 다운로드</h1>
-      <div class="sentence" id="sentence"></div>
-
-      <button onclick="nextSentence()">다음 문장</button>
-
-      <div class="controls">
-        <button onclick="startRecording()">녹음 시작</button>
-        <button id="stopButton" onclick="stopRecording()" disabled>
-          녹음 중지
-        </button>
-        <button onclick="playRecording()">녹음 재생</button>
-        <button onclick="downloadRecording()">녹음 다운로드</button>
-      </div>
-
-      <audio id="audioPlayer" class="audio-player" controls></audio>
+      <h1>Be Verb Translation Quiz with Recording</h1>
+      <form id="quizForm">
+        <div class="question">
+          <div class="korean">1. 저는 학생이에요.</div>
+          <input
+            type="text"
+            name="q1"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(1)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer1">I am a student.</span>
+          </div>
+          <div class="recording-controls" id="controls1"></div>
+        </div>
+        <div class="question">
+          <div class="korean">2. 그녀는 제 친구가 아니에요.</div>
+          <input
+            type="text"
+            name="q2"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(2)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer2">She is not my friend.</span>
+          </div>
+          <div class="recording-controls" id="controls2"></div>
+        </div>
+        <div class="question">
+          <div class="korean">3. 그들은 선생님인가요?</div>
+          <input
+            type="text"
+            name="q3"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(3)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer3">Are they teachers?</span>
+          </div>
+          <div class="recording-controls" id="controls3"></div>
+        </div>
+        <div class="question">
+          <div class="korean">4. 저는 의사가 아니죠?</div>
+          <input
+            type="text"
+            name="q4"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(4)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer4">Am I not a doctor?</span>
+          </div>
+          <div class="recording-controls" id="controls4"></div>
+        </div>
+        <div class="question">
+          <div class="korean">5. 그는 키가 커요.</div>
+          <input
+            type="text"
+            name="q5"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(5)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer5">He is tall.</span>
+          </div>
+          <div class="recording-controls" id="controls5"></div>
+        </div>
+        <div class="question">
+          <div class="korean">6. 우리는 한국 사람이 아니에요.</div>
+          <input
+            type="text"
+            name="q6"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(6)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer6">We are not from Korea.</span>
+          </div>
+          <div class="recording-controls" id="controls6"></div>
+        </div>
+        <div class="question">
+          <div class="korean">7. 준비 되셨나요?</div>
+          <input
+            type="text"
+            name="q7"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(7)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer7">Are you ready?</span>
+          </div>
+          <div class="recording-controls" id="controls7"></div>
+        </div>
+        <div class="question">
+          <div class="korean">8. 그녀는 당신의 여동생이에요.</div>
+          <input
+            type="text"
+            name="q8"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(8)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer8">She is your sister.</span>
+          </div>
+          <div class="recording-controls" id="controls8"></div>
+        </div>
+        <div class="question">
+          <div class="korean">9. 그들은 집에 있지 않아요.</div>
+          <input
+            type="text"
+            name="q9"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button type="button" class="show-answer" onclick="toggleAnswer(9)">
+              Show Answer
+            </button>
+            <span class="answer" id="answer9">They are not at home.</span>
+          </div>
+          <div class="recording-controls" id="controls9"></div>
+        </div>
+        <div class="question">
+          <div class="korean">10. 당신은 선생님이 아니죠?</div>
+          <input
+            type="text"
+            name="q10"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(10)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer10">Are you not a teacher?</span>
+          </div>
+          <div class="recording-controls" id="controls10"></div>
+        </div>
+        <div class="question">
+          <div class="korean">11. 그들은 행복하지 않아요.</div>
+          <input
+            type="text"
+            name="q11"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(11)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer11">They are not happy.</span>
+          </div>
+          <div class="recording-controls" id="controls11"></div>
+        </div>
+        <div class="question">
+          <div class="korean">12. 저는 거미를 두려워해요.</div>
+          <input
+            type="text"
+            name="q12"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(12)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer12">I am afraid of spiders.</span>
+          </div>
+          <div class="recording-controls" id="controls12"></div>
+        </div>
+        <div class="question">
+          <div class="korean">13. 그녀는 예술에 흥미가 있나요?</div>
+          <input
+            type="text"
+            name="q13"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(13)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer13">Is she interested in art?</span>
+          </div>
+          <div class="recording-controls" id="controls13"></div>
+        </div>
+        <div class="question">
+          <div class="korean">14. 그들은 40살이에요.</div>
+          <input
+            type="text"
+            name="q14"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(14)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer14">They are 40 years old.</span>
+          </div>
+          <div class="recording-controls" id="controls14"></div>
+        </div>
+        <div class="question">
+          <div class="korean">15. 그녀는 25살이 아니에요.</div>
+          <input
+            type="text"
+            name="q15"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(15)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer15">She is not 25 years old.</span>
+          </div>
+          <div class="recording-controls" id="controls15"></div>
+        </div>
+        <div class="question">
+          <div class="korean">16. 저는 30살인가요?</div>
+          <input
+            type="text"
+            name="q16"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(16)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer16">Am I 30 years old?</span>
+          </div>
+          <div class="recording-controls" id="controls16"></div>
+        </div>
+        <div class="question">
+          <div class="korean">17. 제 이름은 존이 아니에요.</div>
+          <input
+            type="text"
+            name="q17"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(17)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer17">My name is not John.</span>
+          </div>
+          <div class="recording-controls" id="controls17"></div>
+        </div>
+        <div class="question">
+          <div class="korean">18. 당신의 이름이 존인가요?</div>
+          <input
+            type="text"
+            name="q18"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(18)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer18">Is my name John?</span>
+          </div>
+          <div class="recording-controls" id="controls18"></div>
+        </div>
+        <div class="question">
+          <div class="korean">19. 우리는 한국 사람이 아니죠?</div>
+          <input
+            type="text"
+            name="q19"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(19)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer19">Are we not from Korea?</span>
+          </div>
+          <div class="recording-controls" id="controls19"></div>
+        </div>
+        <div class="question">
+          <div class="korean">20. 그는 키가 크지 않죠?</div>
+          <input
+            type="text"
+            name="q20"
+            placeholder="Write the English sentence"
+          />
+          <div class="answer-container">
+            <button
+              type="button"
+              class="show-answer"
+              onclick="toggleAnswer(20)"
+            >
+              Show Answer
+            </button>
+            <span class="answer" id="answer20">Is he not tall?</span>
+          </div>
+          <div class="recording-controls" id="controls20"></div>
+        </div>
+        <button type="submit" id="submit-btn">Submit</button>
+      </form>
+      <div id="results" class="results"></div>
     </div>
 
     <script>
-      const sentences = [
-        {
-          positive: "The book is interesting.",
-          negative: "The book is not interesting.",
-          question: "Is the book interesting?",
-          questionNegative: "Is the book not interesting?",
-        },
-        {
-          positive: "My parents are supportive.",
-          negative: "My parents are not supportive.",
-          question: "Are my parents supportive?",
-          questionNegative: "Are my parents not supportive?",
-        },
-        {
-          positive: "Her ideas are innovative.",
-          negative: "Her ideas are not innovative.",
-          question: "Are her ideas innovative?",
-          questionNegative: "Are her ideas not innovative?",
-        },
-        {
-          positive: "The weather is nice today.",
-          negative: "The weather is not nice today.",
-          question: "Is the weather nice today?",
-          questionNegative: "Is the weather not nice today?",
-        },
-        {
-          positive: "This problem is difficult.",
-          negative: "This problem is not difficult.",
-          question: "Is this problem difficult?",
-          questionNegative: "Is this problem not difficult?",
-        },
-        {
-          positive: "The students are ready.",
-          negative: "The students are not ready.",
-          question: "Are the students ready?",
-          questionNegative: "Are the students not ready?",
-        },
-        {
-          positive: "My car is old.",
-          negative: "My car is not old.",
-          question: "Is my car old?",
-          questionNegative: "Is my car not old?",
-        },
-        {
-          positive: "My sister is kind.",
-          negative: "My sister is not kind.",
-          question: "Is my sister kind?",
-          questionNegative: "Is my sister not kind?",
-        },
-        {
-          positive: "My best friend is funny.",
-          negative: "My best friend is not funny.",
-          question: "Is my best friend funny?",
-          questionNegative: "Is my best friend not funny?",
-        },
-        {
-          positive: "Our dog is playful.",
-          negative: "Our dog is not playful.",
-          question: "Is our dog playful?",
-          questionNegative: "Is our dog not playful?",
-        },
-        {
-          positive: "My uncle is a student.",
-          negative: "My uncle is not a student.",
-          question: "Is my uncle a student?",
-          questionNegative: "Is my uncle not a student?",
-        },
-      ];
-
+      // Recording functionality
+      const recordings = {};
       let mediaRecorder;
       let audioChunks = [];
-      let usedSentences = []; // To track which sentences were used
 
-      // Get a random sentence from the remaining ones
-      function getRandomSentence() {
-        const availableSentences = sentences.filter(
-          (_, index) => !usedSentences.includes(index)
-        );
-        if (availableSentences.length === 0) {
-          usedSentences = []; // Reset if all sentences have been used
-          return getRandomSentence(); // Recursively call until all sentences are used
+      function setupRecordingControls(questionNum) {
+        const controls = document.getElementById(`controls${questionNum}`);
+        controls.innerHTML = `
+                <button class="record-btn" onclick="startRecording(${questionNum})">Record</button>
+                <button class="stop-btn" onclick="stopRecording(${questionNum})" disabled>Stop</button>
+                <button class="play-btn" onclick="playRecording(${questionNum})" disabled>Play</button>
+                <button class="download-btn" onclick="downloadRecording(${questionNum})" disabled>Download</button>
+            `;
+      }
+
+      async function startRecording(questionNum) {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+          recordings[questionNum] = audioBlob;
+
+          const controls = document.getElementById(`controls${questionNum}`);
+          controls.querySelector(".record-btn").disabled = false;
+          controls.querySelector(".stop-btn").disabled = true;
+          controls.querySelector(".play-btn").disabled = false;
+          controls.querySelector(".download-btn").disabled = false;
+        };
+
+        mediaRecorder.start();
+        const controls = document.getElementById(`controls${questionNum}`);
+        controls.querySelector(".record-btn").disabled = true;
+        controls.querySelector(".stop-btn").disabled = false;
+        controls.querySelector(".play-btn").disabled = true;
+        controls.querySelector(".download-btn").disabled = true;
+      }
+
+      function stopRecording(questionNum) {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      }
+
+      function playRecording(questionNum) {
+        if (recordings[questionNum]) {
+          const audioUrl = URL.createObjectURL(recordings[questionNum]);
+          const audio = new Audio(audioUrl);
+          audio.play();
+        }
+      }
+
+      function downloadRecording(questionNum) {
+        if (recordings[questionNum]) {
+          const audioUrl = URL.createObjectURL(recordings[questionNum]);
+          const a = document.createElement("a");
+          a.href = audioUrl;
+          a.download = `recording_q${questionNum}.webm`;
+          a.click();
+          URL.revokeObjectURL(audioUrl);
+        }
+      }
+
+      // Show/hide answer
+      function toggleAnswer(questionNum) {
+        const answer = document.getElementById(`answer${questionNum}`);
+        if (answer.style.display === "inline") {
+          answer.style.display = "none";
+        } else {
+          answer.style.display = "inline";
+        }
+      }
+
+      // Quiz submission
+      document.addEventListener("DOMContentLoaded", function () {
+        for (let i = 1; i <= 20; i++) {
+          setupRecordingControls(i);
         }
 
-        const randomIndex = Math.floor(
-          Math.random() * availableSentences.length
-        );
-        const randomSentence = availableSentences[randomIndex];
-        usedSentences.push(sentences.indexOf(randomSentence)); // Mark the sentence as used
-        return randomSentence;
-      }
+        document
+          .getElementById("quizForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
 
-      function nextSentence() {
-        const sentence = getRandomSentence();
-        const sentenceType = getRandomSentenceType();
-        const sentenceText = sentence[sentenceType];
-        document.getElementById("sentence").textContent = sentenceText;
-        speakSentence(sentenceText); // Add this to speak the sentence
-      }
+            const answers = {
+              q1: "I am a student.",
+              q2: "She is not my friend.",
+              q3: "Are they teachers?",
+              q4: "Am I not a doctor?",
+              q5: "He is tall.",
+              q6: "We are not from Korea.",
+              q7: "Are you ready?",
+              q8: "She is your sister.",
+              q9: "They are not at home.",
+              q10: "Are you not a teacher?",
+              q11: "They are not happy.",
+              q12: "I am afraid of spiders.",
+              q13: "Is she interested in art?",
+              q14: "They are 40 years old.",
+              q15: "She is not 25 years old.",
+              q16: "Am I 30 years old?",
+              q17: "My name is not John.",
+              q18: "Is my name John?",
+              q19: "Are we not from Korea?",
+              q20: "Is he not tall?",
+            };
 
-      function getRandomSentenceType() {
-        const types = ["positive", "negative", "question", "questionNegative"];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        return randomType;
-      }
+            const correctSentences = {
+              q1: { en: "I am a student.", ko: "저는 학생이에요." },
+              q2: {
+                en: "She is not my friend.",
+                ko: "그녀는 제 친구가 아니에요.",
+              },
+              q3: { en: "Are they teachers?", ko: "그들은 선생님인가요?" },
+              q4: { en: "Am I not a doctor?", ko: "저는 의사가 아니죠?" },
+              q5: { en: "He is tall.", ko: "그는 키가 커요." },
+              q6: {
+                en: "We are not from Korea.",
+                ko: "우리는 한국 사람이 아니에요.",
+              },
+              q7: { en: "Are you ready?", ko: "준비 되셨나요?" },
+              q8: {
+                en: "She is your sister.",
+                ko: "그녀는 당신의 여동생이에요.",
+              },
+              q9: {
+                en: "They are not at home.",
+                ko: "그들은 집에 있지 않아요.",
+              },
+              q10: {
+                en: "Are you not a teacher?",
+                ko: "당신은 선생님이 아니죠?",
+              },
+              q11: { en: "They are not happy.", ko: "그들은 행복하지 않아요." },
+              q12: {
+                en: "I am afraid of spiders.",
+                ko: "저는 거미를 두려워해요.",
+              },
+              q13: {
+                en: "Is she interested in art?",
+                ko: "그녀는 예술에 흥미가 있나요?",
+              },
+              q14: { en: "They are 40 years old.", ko: "그들은 40살이에요." },
+              q15: {
+                en: "She is not 25 years old.",
+                ko: "그녀는 25살이 아니에요.",
+              },
+              q16: { en: "Am I 30 years old?", ko: "저는 30살인가요?" },
+              q17: {
+                en: "My name is not John.",
+                ko: "제 이름은 존이 아니에요.",
+              },
+              q18: { en: "Is my name John?", ko: "당신의 이름이 존인가요?" },
+              q19: {
+                en: "Are we not from Korea?",
+                ko: "우리는 한국 사람이 아니죠?",
+              },
+              q20: { en: "Is he not tall?", ko: "그는 키가 크지 않죠?" },
+            };
 
-      function speakSentence(text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "en-US"; // 영어 설정
-        speechSynthesis.speak(utterance);
-      }
+            const userAnswers = {};
+            for (let i = 1; i <= 20; i++) {
+              userAnswers[`q${i}`] = document
+                .querySelector(`input[name="q${i}"]`)
+                .value.trim();
+            }
 
-      function startRecording() {
-        audioChunks = [];
-        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-          mediaRecorder = new MediaRecorder(stream);
-          mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-          };
-          mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audioPlayer = document.getElementById("audioPlayer");
-            audioPlayer.src = audioUrl;
-            audioPlayer.style.display = "block";
-          };
-          mediaRecorder.start();
-          document.getElementById("stopButton").disabled = false; // Enable the stop button
-          document.getElementById("recordButton").disabled = true; // Disable the start button
-        });
-      }
+            let score = 0;
+            let resultHTML = "<h3>Results:</h3><ul>";
 
-      function stopRecording() {
-        mediaRecorder.stop();
-        document.getElementById("stopButton").disabled = true; // Disable the stop button
-        document.getElementById("recordButton").disabled = false; // Enable the start button
-      }
+            for (let i = 1; i <= 20; i++) {
+              const questionId = `q${i}`;
+              const userAnswer = userAnswers[questionId].toLowerCase();
+              const correctAnswer = answers[questionId].toLowerCase();
+              const correctEn = correctSentences[questionId].en;
+              const correctKo = correctSentences[questionId].ko;
 
-      function playRecording() {
-        const audioPlayer = document.getElementById("audioPlayer");
-        audioPlayer.play();
-      }
+              if (userAnswer === correctAnswer) {
+                resultHTML += `<li class="correct">Question ${i}: Correct! "${correctEn}" (${correctKo})</li>`;
+                score++;
+              } else {
+                resultHTML += `<li class="incorrect">Question ${i}: Incorrect. You wrote: "${userAnswer}". Correct answer: "${correctEn}" (${correctKo})</li>`;
+              }
+            }
 
-      function downloadRecording() {
-        const audioPlayer = document.getElementById("audioPlayer");
-        const audioUrl = audioPlayer.src;
-        const link = document.createElement("a");
-        link.href = audioUrl;
-        link.download = "recording.wav";
-        link.click();
-      }
-
-      // Initialize the first sentence
-      nextSentence();
+            resultHTML += `</ul><p>Your score: ${score} out of 20 (${
+              (score / 20) * 100
+            }%)</p>`;
+            document.getElementById("results").innerHTML = resultHTML;
+          });
+      });
     </script>
   </body>
 </html>

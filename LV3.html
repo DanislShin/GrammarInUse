@@ -7,32 +7,72 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        text-align: center;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         background-color: #f4f4f9;
+      }
+      .container {
+        background-color: white;
         padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 600px;
+        box-sizing: border-box;
       }
       h1 {
+        text-align: center;
         color: #333;
       }
       .question {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        display: flex; /* 질문과 입력 필드를 유연하게 배치 */
+        flex-wrap: wrap; /* 작은 화면에서 줄 바꿈 허용 */
+        align-items: center;
+        gap: 10px; /* 텍스트와 입력 필드 사이 간격 */
+      }
+      input {
+        padding: 5px 10px;
+        font-size: 16px;
+        width: 100%; /* 입력 필드 너비를 유연하게 */
+        max-width: 100px; /* 최대 너비 제한 */
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
       }
       button {
-        margin-top: 20px;
         padding: 10px 20px;
-        font-size: 16px;
-        background-color: #007bff;
+        background-color: #4caf50;
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        font-size: 16px;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 20px;
       }
       button:hover {
-        background-color: #0056b3;
+        background-color: #45a049;
       }
       .result {
         margin-top: 20px;
+        font-size: 20px;
+        text-align: center;
+      }
+      /* 모바일 화면에 맞춘 조정 */
+      @media (max-width: 400px) {
+        .question {
+          font-size: 16px;
+        }
+        input,
+        button {
+          font-size: 14px;
+        }
       }
     </style>
   </head>

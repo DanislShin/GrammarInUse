@@ -8,12 +8,12 @@
       body {
         font-family: Arial, sans-serif;
         margin: 0;
-        padding: 0;
+        padding: 10px;
         display: flex;
         justify-content: center;
         align-items: center;
         flex-direction: column;
-        height: 100vh;
+        min-height: 100vh;
         background-color: #f4f4f9;
       }
       .container {
@@ -21,8 +21,9 @@
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        width: 80%;
+        width: 90%;
         max-width: 800px;
+        box-sizing: border-box;
       }
       h1 {
         text-align: center;
@@ -32,6 +33,7 @@
         font-size: 20px;
         margin-bottom: 20px;
         text-align: center;
+        word-wrap: break-word;
       }
       button {
         padding: 10px 20px;
@@ -40,19 +42,35 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+        width: 100%;
+        max-width: 200px;
+        margin: 5px auto;
+        display: block;
       }
       button:hover {
         background-color: #45a049;
+      }
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
       }
       .controls {
         margin-top: 20px;
         text-align: center;
       }
-      .controls button {
-        margin: 5px;
-      }
       .audio-player {
         display: none;
+        width: 100%;
+        margin-top: 10px;
+      }
+      @media (max-width: 400px) {
+        .sentence {
+          font-size: 16px;
+        }
+        button {
+          font-size: 14px;
+          padding: 8px 16px;
+        }
       }
     </style>
   </head>
@@ -61,15 +79,17 @@
       <h1>문장 녹음, 재생 및 다운로드</h1>
       <div class="sentence" id="sentence"></div>
 
-      <button onclick="nextSentence()">다음 문장</button>
+      <button id="nextButton" onclick="nextSentence()">다음 문장</button>
 
       <div class="controls">
-        <button onclick="startRecording()">녹음 시작</button>
+        <button id="recordButton" onclick="startRecording()">녹음 시작</button>
         <button id="stopButton" onclick="stopRecording()" disabled>
           녹음 중지
         </button>
-        <button onclick="playRecording()">녹음 재생</button>
-        <button onclick="downloadRecording()">녹음 다운로드</button>
+        <button id="playButton" onclick="playRecording()">녹음 재생</button>
+        <button id="downloadButton" onclick="downloadRecording()">
+          녹음 다운로드
+        </button>
       </div>
 
       <audio id="audioPlayer" class="audio-player" controls></audio>
@@ -147,23 +167,22 @@
 
       let mediaRecorder;
       let audioChunks = [];
-      let usedSentences = []; // To track which sentences were used
+      let usedSentences = [];
+      let audioBlob;
 
-      // Get a random sentence from the remaining ones
       function getRandomSentence() {
         const availableSentences = sentences.filter(
           (_, index) => !usedSentences.includes(index)
         );
         if (availableSentences.length === 0) {
-          usedSentences = []; // Reset if all sentences have been used
-          return getRandomSentence(); // Recursively call until all sentences are used
+          usedSentences = [];
+          return getRandomSentence();
         }
-
         const randomIndex = Math.floor(
           Math.random() * availableSentences.length
         );
         const randomSentence = availableSentences[randomIndex];
-        usedSentences.push(sentences.indexOf(randomSentence)); // Mark the sentence as used
+        usedSentences.push(sentences.indexOf(randomSentence));
         return randomSentence;
       }
 
@@ -172,62 +191,81 @@
         const sentenceType = getRandomSentenceType();
         const sentenceText = sentence[sentenceType];
         document.getElementById("sentence").textContent = sentenceText;
-        speakSentence(sentenceText); // Add this to speak the sentence
+        speakSentence(sentenceText);
       }
 
       function getRandomSentenceType() {
         const types = ["positive", "negative", "question", "questionNegative"];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        return randomType;
+        return types[Math.floor(Math.random() * types.length)];
       }
 
       function speakSentence(text) {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "en-US"; // 영어 설정
+        utterance.lang = "en-US";
         speechSynthesis.speak(utterance);
       }
 
-      function startRecording() {
-        audioChunks = [];
-        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-          mediaRecorder = new MediaRecorder(stream);
+      async function startRecording() {
+        try {
+          audioChunks = [];
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/mp4" }); // Safari 호환성 향상
           mediaRecorder.ondataavailable = (event) => {
             audioChunks.push(event.data);
           };
           mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            audioBlob = new Blob(audioChunks, { type: "audio/mp4" });
             const audioUrl = URL.createObjectURL(audioBlob);
             const audioPlayer = document.getElementById("audioPlayer");
             audioPlayer.src = audioUrl;
             audioPlayer.style.display = "block";
+            document.getElementById("stopButton").disabled = true;
+            document.getElementById("recordButton").disabled = false;
+            document.getElementById("playButton").disabled = false;
+            document.getElementById("downloadButton").disabled = false;
           };
           mediaRecorder.start();
-          document.getElementById("stopButton").disabled = false; // Enable the stop button
-          document.getElementById("recordButton").disabled = true; // Disable the start button
-        });
+          document.getElementById("recordButton").disabled = true;
+          document.getElementById("stopButton").disabled = false;
+          document.getElementById("playButton").disabled = true;
+          document.getElementById("downloadButton").disabled = true;
+        } catch (error) {
+          console.error("녹음 오류:", error);
+          alert("녹음을 시작할 수 없습니다. 마이크 권한을 확인해주세요.");
+        }
       }
 
       function stopRecording() {
-        mediaRecorder.stop();
-        document.getElementById("stopButton").disabled = true; // Disable the stop button
-        document.getElementById("recordButton").disabled = false; // Enable the start button
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+          mediaRecorder.stop();
+          mediaRecorder.stream.getTracks().forEach((track) => track.stop()); // 스트림 종료
+        }
       }
 
       function playRecording() {
         const audioPlayer = document.getElementById("audioPlayer");
-        audioPlayer.play();
+        if (audioPlayer.src) {
+          audioPlayer.play();
+        } else {
+          alert("먼저 녹음을 완료해주세요.");
+        }
       }
 
       function downloadRecording() {
-        const audioPlayer = document.getElementById("audioPlayer");
-        const audioUrl = audioPlayer.src;
-        const link = document.createElement("a");
-        link.href = audioUrl;
-        link.download = "recording.wav";
-        link.click();
+        if (audioBlob) {
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const link = document.createElement("a");
+          link.href = audioUrl;
+          link.download = "recording.mp4"; // mp4로 변경
+          link.click();
+        } else {
+          alert("다운로드할 녹음이 없습니다.");
+        }
       }
 
-      // Initialize the first sentence
+      // 초기화
       nextSentence();
     </script>
   </body>
